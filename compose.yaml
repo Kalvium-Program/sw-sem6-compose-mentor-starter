@@ -1,0 +1,34 @@
+services:
+  app:
+    build: .
+    ports:
+      - "127.0.0.1:${HOST_PORT:-8086}:3000"
+    environment:
+      DB_HOST: localhost
+      DB_PASSWORD_FILE: /run/secrets/db_password
+    secrets: [db_password]
+    depends_on:
+      db:
+        condition: service_healthy
+  db:
+    image: postgres:16-bookworm
+    environment:
+      POSTGRES_USER: events
+      POSTGRES_DB: events
+      POSTGRES_PASSWORD_FILE: /run/secrets/db_password
+    secrets: [db_password]
+    volumes:
+      - data:/var/lib/postgresql/data
+      - ./db:/docker-entrypoint-initdb.d:ro
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U events -d events"]
+      interval: 2s
+      timeout: 3s
+      retries: 20
+volumes:
+  data:
+    external: true
+    name: lu210-demo-data
+secrets:
+  db_password:
+    file: ./secrets/db_password.txt

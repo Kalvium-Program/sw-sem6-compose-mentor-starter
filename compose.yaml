@@ -28,7 +28,7 @@ services:
 volumes:
   data:
     external: true
-    name: lu210-demo-data
+    name: campus-demo-data
 secrets:
   db_password:
     file: ./secrets/db_password.txt
